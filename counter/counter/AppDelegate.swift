@@ -42,6 +42,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         UserDefaults.standard.set(false, forKey: "Locking")
                     } else {
                         print("Unlocking")
+                        var count = UserDefaults.standard.integer(forKey: "unlockCount")
+                        count += 1
+                        UserDefaults.standard.set(count, forKey: "unlockCount")
                     }
             }
                 
