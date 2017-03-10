@@ -12,17 +12,39 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var locking: Bool = false
     var observers = [NSObjectProtocol]()
+    var locking: Bool = false
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+//        let observerSelf = UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque())
+
+
         let callback: @convention(c)
-            (CFNotificationCenter?, UnsafeMutablePointer<Void>, CFString?, UnsafeRawPointer,        CFDictionary?) -> Void = {
+            (CFNotificationCenter?, UnsafeMutableRawPointer, CFString?, UnsafeRawPointer,        CFDictionary?) -> Void = {
                 (center, observer, name, object, userInfo) in
                 
                 //Execute callback code
-                print(name)
+//                print(name)
+//                let count = UserDefaults.standard.integer(forKey: "unlockCount")
+//                print(count)
+                
+                
+                let mySelf = Unmanaged<AppDelegate>.fromOpaque(observer).takeUnretainedValue()
+                
+                if(name! as String == "com.apple.springboard.lockcomplete"){
+                    UserDefaults.standard.set(true, forKey: "Locking")
+//                    print(mySelf.locking)
+//                    mySelf.locking = true
+                } else if(name! as String == "com.apple.springboard.lockstate"){
+                    if(UserDefaults.standard.bool(forKey: "Locking")){
+                        print("Locking")
+                        UserDefaults.standard.set(false, forKey: "Locking")
+                    } else {
+                        print("Unlocking")
+                    }
+            }
+                
                 
         }
         
@@ -32,6 +54,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),nil ,exCb,"com.apple.springboard.lockcomplete" as CFString,nil ,CFNotificationSuspensionBehavior.deliverImmediately)
         
         return true
+    }
+    
+    func lockComplete(){
+        if(self.locking){
+            print("Locking")
+            locking = false
+        } else {
+            print("Unlocking")
+        }
+    }
+    
+    func lockState(){
+        self.locking = true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
